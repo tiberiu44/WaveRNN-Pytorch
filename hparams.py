@@ -3,7 +3,7 @@ import tensorflow as tf
 # Default hyperparameters:
 hparams = tf.contrib.training.HParams(
     name="WaveRNN",
-    num_workers=32,
+    num_workers=2,
     # Input type:
     # 1. raw [-1, 1]
     # 2. mixture [-1, 1]
@@ -29,8 +29,8 @@ hparams = tf.contrib.training.HParams(
     fmin=95,
     fmax=7600,
     n_fft=2048,
-    hop_size=200,
-    win_size=800,
+    hop_size=256,
+    win_size=1024,
     sample_rate=16000,
 
     min_level_db=-100,
@@ -38,25 +38,28 @@ hparams = tf.contrib.training.HParams(
     rescaling=False,
     rescaling_max=0.999,
 
-    #Mel and Linear spectrograms normalization/scaling and clipping
-    signal_normalization = True, #Whether to normalize mel spectrograms to some predefined range (following below parameters)
-    allow_clipping_in_normalization = True, #Only relevant if mel_normalization = True
-    symmetric_mels = True, #Whether to scale the data to be symmetric around 0. (Also multiplies the output range by 2, faster and cleaner convergence)
-    max_abs_value = 4., #max absolute value of data. If symmetric, data will be [-max, max] else [0, max] (Must not be too big to avoid gradient explosion,
+    # Mel and Linear spectrograms normalization/scaling and clipping
+    signal_normalization=True,
+    # Whether to normalize mel spectrograms to some predefined range (following below parameters)
+    allow_clipping_in_normalization=True,  # Only relevant if mel_normalization = True
+    symmetric_mels=True,
+    # Whether to scale the data to be symmetric around 0. (Also multiplies the output range by 2, faster and cleaner convergence)
+    max_abs_value=4.,
+    # max absolute value of data. If symmetric, data will be [-max, max] else [0, max] (Must not be too big to avoid gradient explosion,
 
-    #Contribution by @begeekmyfriend
-    #Spectrogram Pre-Emphasis (Lfilter: Reduce spectrogram noise and helps model certitude levels. Also allows for better G&L phase reconstruction)
-    preemphasize = False, #whether to apply filter
-    preemphasis = 0.97, #filter coefficient.
+    # Contribution by @begeekmyfriend
+    # Spectrogram Pre-Emphasis (Lfilter: Reduce spectrogram noise and helps model certitude levels. Also allows for better G&L phase reconstruction)
+    preemphasize=False,  # whether to apply filter
+    preemphasis=0.97,  # filter coefficient.
 
-    magnitude_power=2., #The power of the spectrogram magnitude (1. for energy, 2. for power)
+    magnitude_power=2.,  # The power of the spectrogram magnitude (1. for energy, 2. for power)
 
-	# Use LWS (https://github.com/Jonathan-LeRoux/lws) for STFT and phase reconstruction
-	# It's preferred to set True to use with https://github.com/r9y9/wavenet_vocoder
-	# Does not work if n_ffit is not multiple of hop_size!!
-	use_lws=False, #Only used to set as True if using WaveNet, no difference in performance is observed in either cases.
-	silence_threshold=2, #silence threshold used for sound trimming for wavenet preprocessing
-
+    # Use LWS (https://github.com/Jonathan-LeRoux/lws) for STFT and phase reconstruction
+    # It's preferred to set True to use with https://github.com/r9y9/wavenet_vocoder
+    # Does not work if n_ffit is not multiple of hop_size!!
+    use_lws=False,
+    # Only used to set as True if using WaveNet, no difference in performance is observed in either cases.
+    silence_threshold=2,  # silence threshold used for sound trimming for wavenet preprocessing
 
     # ----------------
     #
@@ -67,15 +70,15 @@ hparams = tf.contrib.training.HParams(
     pad=2,
     # note upsample factors must multiply out to be equal to hop_size, so adjust
     # if necessary (i.e 4 x 5 x 10 = 200)
-    upsample_factors=(4, 5, 10),
+    upsample_factors=(4, 4, 4, 4),
     compute_dims=64,
-    res_out_dims=32*2, #aux output is fed into 2 downstream nets
+    res_out_dims=32 * 2,  # aux output is fed into 2 downstream nets
     res_blocks=3,
     # ----------------
     #
     # ----------------
     # training parameters
-    batch_size=128,
+    batch_size=32,
     nepochs=5000,
     save_every_step=10000,
     evaluate_every_step=10000,
@@ -102,7 +105,7 @@ hparams = tf.contrib.training.HParams(
     adam_beta2=0.999,
     adam_eps=1e-8,
     amsgrad=False,
-    weight_decay=0, #1e-5,
+    weight_decay=0,  # 1e-5,
     fix_learning_rate=None,
     # modify if one wants to use a fixed learning rate, else set to None to use noam learning rate
     # -----------------

@@ -17,13 +17,14 @@ from hparams import hparams as hp
 from utils import *
 from tqdm import tqdm
 
+
 def get_wav_mel(path):
     """Given path to .wav file, get the quantized wav and mel spectrogram as numpy vectors
 
     """
     wav = load_wav(path)
     mel = melspectrogram(wav)
-    if hp.input_type == 'raw' or hp.input_type=='mixture':
+    if hp.input_type == 'raw' or hp.input_type == 'mixture':
         return wav.astype(np.float32), mel
     elif hp.input_type == 'mulaw':
         quant = mulaw_quantize(wav, hp.mulaw_quantize_channels)
@@ -42,10 +43,10 @@ def process_data(wav_dirs, output_path, mel_path, wav_path):
     """
     dataset_ids = []
     # get list of wav files
-    wav_files=[]
+    wav_files = []
     for wav_dir in wav_dirs:
         thisdir = os.listdir(wav_dir)
-        thisdir=[ os.path.join(wav_dir, thisfile) for thisfile in thisdir]
+        thisdir = [os.path.join(wav_dir, thisfile) for thisfile in thisdir]
         wav_files += thisdir
 
     # check wav_file
@@ -55,41 +56,44 @@ def process_data(wav_dirs, output_path, mel_path, wav_path):
     wav_files = wav_files[4:]
     for i, wav_file in enumerate(tqdm(wav_files)):
         # get the file id
+        # from ipdb import set_trace
+        # set_trace()
         file_id = '{:d}'.format(i).zfill(5)
-        wav, mel = get_wav_mel(os.path.join(wav_dir,wav_file))
+        wav, mel = get_wav_mel(wav_file)
         # save
-        np.save(os.path.join(mel_path,file_id+".npy"), mel)
-        np.save(os.path.join(wav_path,file_id+".npy"), wav)
+        np.save(os.path.join(mel_path, file_id + ".npy"), mel)
+        np.save(os.path.join(wav_path, file_id + ".npy"), wav)
         # add to dataset_ids
         dataset_ids.append(file_id)
 
     # save dataset_ids
-    with open(os.path.join(output_path,'dataset_ids.pkl'), 'wb') as f:
+    with open(os.path.join(output_path, 'dataset_ids.pkl'), 'wb') as f:
         pickle.dump(dataset_ids, f)
 
     # process testing_wavs
-    test_path = os.path.join(output_path,'test')
+    test_path = os.path.join(output_path, 'test')
     os.makedirs(test_path, exist_ok=True)
     for i, wav_file in enumerate(test_wav_files):
-        wav, mel = get_wav_mel(os.path.join(wav_dir,wav_file))
+        wav, mel = get_wav_mel(wav_file)
         # save test_wavs
-        np.save(os.path.join(test_path,"test_{}_mel.npy".format(i)),mel)
-        np.save(os.path.join(test_path,"test_{}_wav.npy".format(i)),wav)
+        np.save(os.path.join(test_path, "test_{}_mel.npy".format(i)), mel)
+        np.save(os.path.join(test_path, "test_{}_wav.npy".format(i)), wav)
 
-    
-    print("\npreprocessing done, total processed wav files:{}.\nProcessed files are located in:{}".format(len(wav_files), os.path.abspath(output_path)))
+    print(
+        "\npreprocessing done, total processed wav files:{}.\nProcessed files are located in:{}".format(len(wav_files),
+                                                                                                        os.path.abspath(
+                                                                                                            output_path)))
 
 
-
-if __name__=="__main__":
+if __name__ == "__main__":
     args = docopt(__doc__)
     wav_dir = args["<wav-dir>"]
     output_dir = args["--output-dir"]
 
     # create paths
-    output_path = os.path.join(output_dir,"")
-    mel_path = os.path.join(output_dir,"mel")
-    wav_path = os.path.join(output_dir,"wav")
+    output_path = os.path.join(output_dir, "")
+    mel_path = os.path.join(output_dir, "mel")
+    wav_path = os.path.join(output_dir, "wav")
 
     # create dirs
     os.makedirs(output_path, exist_ok=True)
@@ -98,7 +102,6 @@ if __name__=="__main__":
 
     # process data
     process_data(wav_dir, output_path, mel_path, wav_path)
-
 
 
 def test_get_wav_mel():

@@ -6,7 +6,7 @@
 #include "wavernn.h"
 
 const int RES_BLOCKS = 3;
-const int UPSAMPLE_LAYERS = 3;
+const int UPSAMPLE_LAYERS = 4;
 
 Vectorf softmax( const Vectorf& x );
 
