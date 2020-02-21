@@ -8,7 +8,7 @@
 using namespace Eigen;
 
 const int SPARSE_GROUP_SIZE = 4; //When pruning we use groups of 4 to reduce index
-const int MULAW_QUANTIZE_CHANNELS = 512;  //same as hparams.mulaw_quantize_channels
+const int MULAW_QUANTIZE_CHANNELS = 256;  //same as hparams.mulaw_quantize_channels
 const uint8_t ROW_END_MARKER = 255;
 
 typedef Matrix<float, Dynamic, Dynamic, RowMajor> Matrixf;

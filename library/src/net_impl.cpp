@@ -18,12 +18,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Vectorf softmax( const Vectorf& x )
 {
+    float temperature=0.5;
     float maxVal = x.maxCoeff();
     Vectorf y = x.array()-maxVal;
 
     y = Eigen::exp(y.array());
     float sum = y.sum();
-    return y.array() / sum;
+    Vectorf tmp = y.array() / sum;
+    tmp=tmp.array().pow(1.0f/temperature);
+    sum=tmp.sum();
+    return tmp.array() / sum;
 }
 
 
@@ -183,8 +187,8 @@ Vectorf Model::apply(const Matrixf &mels_in)
         Vectorf posterior = softmax( logits );
 
         float newAmplitude = sampleCategorical( posterior );
-        newAmplitude = (2.*newAmplitude) / (posterior.size()-1.) - 1.; //for bits output
-        //newAmplitude = invMulawQuantize( newAmplitude );   //mulaw output
+        //newAmplitude = (2.*newAmplitude) / (posterior.size()-1.) - 1.; //for bits output
+        newAmplitude = invMulawQuantize( newAmplitude );   //mulaw output
         wav_out(i) = x(0) = newAmplitude;
 
     }
